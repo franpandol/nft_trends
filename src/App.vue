@@ -1,24 +1,34 @@
 <template>
+<div style="padding: 40px" class="container">
+    <div class="search_container">
+        <form v-on:submit="search">
+            <h3>Search ETH address</h3>
+            <input type="text" v-model="message" >
+            <input type="submit">
+        </form>
+    </div>
 
-<form v-on:submit="search">
-    <h3>Search ETH address</h3>
-    <input type="text" v-model="message" >
-    <input type="submit">
-</form>
-
-Number of NFTS: {{ nfts_length }}<br />
-Owner: {{ owner_address }}
-
-<div style="padding: 40px" class="col-12" v-for="nft in nfts" v-bind:key="nft.id">
-    <h3>{{ nft.title }}</h3>
-    <p>{{ nft.description }}</p>
-    <img :src="nft.metadata.image" />
+    <h3>Number of NFTS: {{ nfts_length }}</h3>
+    <h3>Owner: {{ owner_address }}</h3>
+    
+    <NFTCard
+        v-for="nft in nfts"
+        :key="nft.id"
+        :title="nft.title"
+        :description="nft.description"
+        :image="nft.media[0].gateway"
+    />
 </div>
 </template>
 
 <script>
 import axios from "axios";
+import NFTCard from "./components/NFTCard.vue";
+
 export default {
+    components: {
+        NFTCard
+    },
     data() {
         return {
             nfts: [],
@@ -44,13 +54,6 @@ export default {
                     this.nfts = response.data.ownedNfts;
                     this.nfts_length = this.nfts.length;
                     this.owner_address = owner;
-
-					for (const nft in this.nfts) {
-						// replace ipfs with a public ipfs node to see the images
-                        this.nfts[nft].metadata.image =
-                            "https://gateway.pinata.cloud/ipfs/" +
-                            this.nfts[nft].metadata.image.replace("ipfs://", "");
-                    }
                 })
                 .catch((error) => console.log(error));
         },
