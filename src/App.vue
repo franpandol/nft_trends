@@ -1,4 +1,5 @@
 <template>
+
 <div style="padding: 40px" class="container">
     <div class="search_container">
         <form v-on:submit="search">
@@ -25,6 +26,7 @@
 import axios from "axios";
 import NFTCard from "./components/NFTCard.vue";
 
+var alchemyBaseUrl = "https://eth-mainnet.alchemyapi.io/v2/" + process.env.VUE_APP_ALCHEMY_API_KEY;
 export default {
     components: {
         NFTCard
@@ -38,17 +40,16 @@ export default {
     },
 
     methods: {
-        async getData(owner_param) {
+        async getNFTData(owner_param) {
             var owner = owner_param;
-            // construct the axios request:
             var config = {
                 method: "get",
-                url: "https://eth-mainnet.alchemyapi.io/v2/" +
-                    process.env.VUE_APP_ALCHEMY_API_KEY +
+                url: alchemyBaseUrl +
                     "/getNFTs/?owner=" +
                     owner,
             };
-            // make the request and print the formatted response:
+
+
             axios(config)
                 .then((response) => {
                     this.nfts = response.data.ownedNfts;
@@ -56,11 +57,37 @@ export default {
                     this.owner_address = owner;
                 })
                 .catch((error) => console.log(error));
+
+        },
+        async getAssetsTransfers(owner_param){
+            let data = JSON.stringify({
+                "jsonrpc": "2.0",
+                "id": 0,
+                "method": "alchemy_getAssetTransfers",
+                "params": [
+                    {
+                    "fromBlock": "0x0",
+                    "fromAddress": owner_param,
+                    }
+                ]
+                });
+
+            var requestOptions = {
+                method: 'post',
+                headers: { 'Content-Type': 'application/json' },
+                data: data,
+            };
+
+            axios(alchemyBaseUrl, requestOptions)
+                .then(response => console.log(JSON.stringify(response.data, null, 2)))
+                .catch(error => console.log(error));
+
         },
 
         search(e){
             e.preventDefault() // it prevent from page reload
-            this.getData(this.message)
+            this.getNFTData(this.message)
+            this.getAssetsTransfers(this.message)
         }
     },
 
