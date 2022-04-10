@@ -1,6 +1,14 @@
 <template>
+
+<form v-on:submit="search">
+    <h3>Search ETH address</h3>
+    <input type="text" v-model="message" >
+    <input type="submit">
+</form>
+
 Number of NFTS: {{ nfts_length }}<br />
 Owner: {{ owner_address }}
+
 <div style="padding: 40px" class="col-12" v-for="nft in nfts" v-bind:key="nft.id">
     <h3>{{ nft.title }}</h3>
     <p>{{ nft.description }}</p>
@@ -20,9 +28,8 @@ export default {
     },
 
     methods: {
-        async getData() {
-            // replace with your own address
-            var owner = "<Ethereum address>";
+        async getData(owner_param) {
+            var owner = owner_param;
             // construct the axios request:
             var config = {
                 method: "get",
@@ -47,10 +54,14 @@ export default {
                 })
                 .catch((error) => console.log(error));
         },
+
+        search(e){
+            e.preventDefault() // it prevent from page reload
+            this.getData(this.message)
+        }
     },
 
     created() {
-        this.getData();
     },
 };
 </script>
